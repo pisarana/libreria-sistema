@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Librería</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<div class="wrapper">
+  <aside class="sidebar" id="sidebar-container"></aside>
+  <div class="main-content">
+    <header class="topbar" id="topbar-container"></header>
+    <main class="page-content">
+      <!-- Stat cards -->
+      <div class="row g-3 mb-4" id="stats-row">
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-book"></i></div>
+            <div><div class="stat-value" id="stat-libros">—</div><div class="stat-label">Libros</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-people"></i></div>
+            <div><div class="stat-value" id="stat-usuarios">—</div><div class="stat-label">Usuarios</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-person-lines-fill"></i></div>
+            <div><div class="stat-value" id="stat-autores">—</div><div class="stat-label">Autores</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-tags"></i></div>
+            <div><div class="stat-value" id="stat-categorias">—</div><div class="stat-label">Categorías</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon teal"><i class="bi bi-arrow-left-right"></i></div>
+            <div><div class="stat-value" id="stat-prestamos">—</div><div class="stat-label">Préstamos</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon red"><i class="bi bi-clock-history"></i></div>
+            <div><div class="stat-value" id="stat-activos">—</div><div class="stat-label">Activos</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts + ultimos prestamos -->
+      <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="section-header mb-3">
+                <span class="section-title">Préstamos por mes</span>
+              </div>
+              <canvas id="chart-prestamos" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="section-header">
+                <span class="section-title">Últimos préstamos</span>
+                <a href="/pages/prestamos.html" class="btn btn-sm btn-outline-primary">Ver todos</a>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead><tr><th>Usuario</th><th>Fecha</th><th>Estado</th></tr></thead>
+                  <tbody id="tabla-ultimos-prestamos">
+                    <tr><td colspan="3" class="text-center text-muted py-3">Cargando...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Libros bajo stock -->
+      <div class="card">
+        <div class="card-body">
+          <div class="section-header">
+            <span class="section-title"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Libros con bajo stock</span>
+            <a href="/pages/inventario.html" class="btn btn-sm btn-outline-warning">Ver inventario</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Título</th><th>Autor</th><th>Categoría</th><th>Stock</th></tr></thead>
+              <tbody id="tabla-bajo-stock">
+                <tr><td colspan="4" class="text-center text-muted py-3">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script type="module">
+import { api, showToast, showSpinner, hideSpinner, formatDate } from '/js/utils.js';
+import { renderSidebar } from '/js/components/sidebar.js';
+import { renderNavbar } from '/js/components/navbar.js';
+
+let usuario = null;
+try {
+  usuario = JSON.parse(sessionStorage.getItem('usuario'));
+} catch(_) {}
+
+// Auth check
+(async () => {
+  try {
+    const res = await api('/api/auth/me');
+    if (res && res.data) {
+      usuario = res.data;
+      sessionStorage.setItem('usuario', JSON.stringify(usuario));
+    }
+  } catch(_) {
+    window.location.href = '/index.html';
+    return;
+  }
+
+  renderSidebar(usuario);
+  renderNavbar('Dashboard', usuario);
+  await loadDashboard();
+})();
+
+async function loadDashboard() {
+  showSpinner();
+  try {
+    const res = await api('/api/dashboard/stats');
+    const data = res.data;
+
+    document.getElementById('stat-libros').textContent = data.totalLibros;
+    document.getElementById('stat-usuarios').textContent = data.totalUsuarios;
+    document.getElementById('stat-autores').textContent = data.totalAutores;
+    document.getElementById('stat-categorias').textContent = data.totalCategorias;
+    document.getElementById('stat-prestamos').textContent = data.totalPrestamos;
+    document.getElementById('stat-activos').textContent = data.prestamosActivos;
+
+    // Chart
+    const labels = (data.prestamosPorMes || []).map(m => m.mes ? m.mes.substring(0, 7) : '');
+    const values = (data.prestamosPorMes || []).map(m => m.total);
+    new Chart(document.getElementById('chart-prestamos'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Préstamos',
+          data: values,
+          backgroundColor: '#2563EB',
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+
+    // Últimos préstamos
+    const tbodyPrestamos = document.getElementById('tabla-ultimos-prestamos');
+    if (!data.ultimosPrestamos || data.ultimosPrestamos.length === 0) {
+      tbodyPrestamos.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">Sin préstamos</td></tr>';
+    } else {
+      tbodyPrestamos.innerHTML = data.ultimosPrestamos.map(p => `
+        <tr>
+          <td>${p.usuarioNombre || '-'}</td>
+          <td>${formatDate(p.fechaPrestamo)}</td>
+          <td><span class="badge-${p.estado?.toLowerCase()}">${p.estado}</span></td>
+        </tr>`).join('');
+    }
+
+    // Bajo stock
+    const tbodyStock = document.getElementById('tabla-bajo-stock');
+    if (!data.librosBajoStock || data.librosBajoStock.length === 0) {
+      tbodyStock.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Sin alertas de stock</td></tr>';
+    } else {
+      tbodyStock.innerHTML = data.librosBajoStock.map(l => `
+        <tr>
+          <td>${l.titulo}</td>
+          <td>${l.autorNombre || '-'}</td>
+          <td>${l.categoriaNombre || '-'}</td>
+          <td><span class="stock-low">${l.stock}</span></td>
+        </tr>`).join('');
+    }
+  } catch(err) {
+    showToast('Error cargando dashboard: ' + err.message, 'danger');
+  } finally {
+    hideSpinner();
+  }
+}
+</script>
+</body>
+</html>

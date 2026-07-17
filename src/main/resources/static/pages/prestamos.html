@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Préstamos — Librería</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<div class="wrapper">
+  <aside class="sidebar" id="sidebar-container"></aside>
+  <div class="main-content">
+    <header class="topbar" id="topbar-container"></header>
+    <main class="page-content">
+      <div class="page-header mb-0">
+        <h1><i class="bi bi-arrow-left-right me-2 text-primary"></i>Préstamos</h1>
+      </div>
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mt-3 mb-3" id="tabs-prestamo">
+        <li class="nav-item">
+          <button class="nav-link active" data-tab="nuevo">
+            <i class="bi bi-plus-circle me-1"></i>Nuevo Préstamo
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-tab="historial">
+            <i class="bi bi-clock-history me-1"></i>Historial
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab: Nuevo Préstamo -->
+      <div id="tab-nuevo">
+        <div class="card">
+          <div class="card-body">
+            <form id="form-prestamo" novalidate>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Usuario *</label>
+                  <select class="form-select" id="pre-usuario">
+                    <option value="">Seleccionar usuario...</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Fecha de devolución (opcional)</label>
+                  <input type="date" class="form-control" id="pre-fecha-devolucion">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Observaciones</label>
+                  <input type="text" class="form-control" id="pre-observaciones" placeholder="Notas opcionales...">
+                </div>
+              </div>
+
+              <hr>
+              <h6 class="mb-3">Libros del préstamo</h6>
+              <div class="row g-2 mb-3">
+                <div class="col-md-7">
+                  <input type="text" class="form-control" id="buscar-libro-input" placeholder="Buscar libro por título...">
+                </div>
+                <div class="col-md-3">
+                  <input type="number" class="form-control" id="cantidad-libro" value="1" min="1">
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-outline-primary w-100" id="btn-agregar-libro">
+                    <i class="bi bi-plus-lg"></i> Agregar
+                  </button>
+                </div>
+              </div>
+              <div id="sugerencias-libros" class="list-group mb-3" style="display:none;max-height:180px;overflow-y:auto;"></div>
+
+              <div class="table-responsive mb-3">
+                <table class="table table-sm">
+                  <thead><tr><th>Libro</th><th>Cantidad</th><th></th></tr></thead>
+                  <tbody id="tabla-detalles-prestamo">
+                    <tr id="row-empty-detalle"><td colspan="3" class="text-muted text-center py-2">Agrega libros al préstamo</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-primary px-4" id="btn-registrar-prestamo">
+                  <i class="bi bi-check-lg me-1"></i>Registrar Préstamo
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Historial -->
+      <div id="tab-historial" style="display:none;">
+        <div class="card mb-3">
+          <div class="card-body py-2">
+            <div class="d-flex gap-2 flex-wrap">
+              <select class="form-select" style="width:auto;" id="filtro-estado">
+                <option value="">Todos los estados</option>
+                <option value="ACTIVO">Activo</option>
+                <option value="DEVUELTO">Devuelto</option>
+                <option value="VENCIDO">Vencido</option>
+              </select>
+              <button class="btn btn-outline-secondary" id="btn-filtrar">Filtrar</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr><th>ID</th><th>Usuario</th><th>Fecha</th><th>Devolución</th><th>Estado</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-historial">
+                  <tr><td colspan="6" class="text-center py-4 text-muted">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 d-flex justify-content-center" id="paginacion-historial"></div>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+import { api, showToast, showSpinner, hideSpinner, confirmDelete, renderPagination, formatDate } from '/js/utils.js';
+import { renderSidebar } from '/js/components/sidebar.js';
+import { renderNavbar } from '/js/components/navbar.js';
+import Validators from '/js/validators.js';
+import PrestamoService from '/js/services/prestamoService.js';
+import UsuarioService from '/js/services/usuarioService.js';
+import LibroService from '/js/services/libroService.js';
+
+let usuario = null;
+let detalles = []; // { libroId, libroTitulo, cantidad }
+let libroSeleccionado = null;
+let histPage = 0;
+let histTotalPages = 0;
+
+(async () => {
+  try {
+    const res = await api('/api/auth/me');
+    if (res && res.data) { usuario = res.data; sessionStorage.setItem('usuario', JSON.stringify(usuario)); }
+  } catch(_) { window.location.href = '/index.html'; return; }
+
+  renderSidebar(usuario);
+  renderNavbar('Préstamos', usuario);
+
+  // Load usuarios for select
+  try {
+    const res = await UsuarioService.listar({ page: 0, size: 100 });
+    const select = document.getElementById('pre-usuario');
+    (res.data.content || []).forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.id;
+      opt.textContent = `${u.nombre} ${u.apellido} — ${u.correo}`;
+      select.appendChild(opt);
+    });
+  } catch(_) {}
+
+  await cargarHistorial();
+})();
+
+// Tab switching
+document.querySelectorAll('[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-nuevo').style.display = btn.dataset.tab === 'nuevo' ? '' : 'none';
+    document.getElementById('tab-historial').style.display = btn.dataset.tab === 'historial' ? '' : 'none';
+  });
+});
+
+// Buscar libro (autocomplete)
+let searchTimeout = null;
+document.getElementById('buscar-libro-input').addEventListener('input', (e) => {
+  clearTimeout(searchTimeout);
+  const q = e.target.value.trim();
+  if (q.length < 2) { document.getElementById('sugerencias-libros').style.display = 'none'; return; }
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await LibroService.listar({ busqueda: q, size: 8 });
+      const libros = res.data.content || [];
+      const ul = document.getElementById('sugerencias-libros');
+      if (!libros.length) { ul.style.display = 'none'; return; }
+      ul.innerHTML = libros.map(l =>
+        `<button type="button" class="list-group-item list-group-item-action" data-id="${l.id}" data-titulo="${l.titulo.replace(/"/g,'&quot;')}" data-stock="${l.stock}">
+          <strong>${l.titulo}</strong> <span class="text-muted small">Stock: ${l.stock}</span>
+         </button>`).join('');
+      ul.style.display = '';
+      ul.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          libroSeleccionado = { id: parseInt(btn.dataset.id), titulo: btn.dataset.titulo, stock: parseInt(btn.dataset.stock) };
+          document.getElementById('buscar-libro-input').value = btn.dataset.titulo;
+          ul.style.display = 'none';
+        });
+      });
+    } catch(_) {}
+  }, 300);
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#buscar-libro-input') && !e.target.closest('#sugerencias-libros')) {
+    document.getElementById('sugerencias-libros').style.display = 'none';
+  }
+});
+
+document.getElementById('btn-agregar-libro').addEventListener('click', () => {
+  if (!libroSeleccionado) { showToast('Selecciona un libro de la lista', 'warning'); return; }
+  const cantidad = parseInt(document.getElementById('cantidad-libro').value) || 1;
+  if (cantidad < 1) { showToast('Cantidad mínima: 1', 'warning'); return; }
+  const existe = detalles.find(d => d.libroId === libroSeleccionado.id);
+  if (existe) { showToast('El libro ya está en el préstamo', 'warning'); return; }
+  detalles.push({ libroId: libroSeleccionado.id, libroTitulo: libroSeleccionado.titulo, cantidad });
+  document.getElementById('buscar-libro-input').value = '';
+  document.getElementById('cantidad-libro').value = '1';
+  libroSeleccionado = null;
+  renderDetalles();
+});
+
+function renderDetalles() {
+  const tbody = document.getElementById('tabla-detalles-prestamo');
+  if (!detalles.length) {
+    tbody.innerHTML = '<tr id="row-empty-detalle"><td colspan="3" class="text-muted text-center py-2">Agrega libros al préstamo</td></tr>';
+    return;
+  }
+  tbody.innerHTML = detalles.map((d, i) => `
+    <tr>
+      <td>${d.libroTitulo}</td>
+      <td>${d.cantidad}</td>
+      <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="quitarDetalle(${i})"><i class="bi bi-x"></i></button></td>
+    </tr>`).join('');
+}
+
+window.quitarDetalle = (i) => { detalles.splice(i, 1); renderDetalles(); };
+
+document.getElementById('btn-registrar-prestamo').addEventListener('click', async () => {
+  Validators.clearAllErrors('form-prestamo');
+  const usuarioId = document.getElementById('pre-usuario').value;
+  if (!usuarioId) { Validators.showFieldError('pre-usuario', 'Selecciona un usuario'); return; }
+  if (!detalles.length) { showToast('Agrega al menos un libro', 'warning'); return; }
+
+  const btn = document.getElementById('btn-registrar-prestamo');
+  btn.disabled = true;
+  showSpinner();
+  try {
+    const data = {
+      usuarioId: parseInt(usuarioId),
+      fechaDevolucion: document.getElementById('pre-fecha-devolucion').value || null,
+      observaciones: document.getElementById('pre-observaciones').value,
+      detalles: detalles.map(d => ({ libroId: d.libroId, cantidad: d.cantidad }))
+    };
+    await PrestamoService.crear(data);
+    showToast('Préstamo registrado correctamente');
+    detalles = [];
+    renderDetalles();
+    document.getElementById('form-prestamo').reset();
+    document.getElementById('pre-usuario').selectedIndex = 0;
+  } catch(err) { showToast(err.message, 'danger'); } finally { hideSpinner(); btn.disabled = false; }
+});
+
+// Historial
+async function cargarHistorial(page = 0) {
+  showSpinner();
+  try {
+    const estado = document.getElementById('filtro-estado').value;
+    const params = { page, size: 10 };
+    if (estado) params.estado = estado;
+    const res = await PrestamoService.listar(params);
+    const data = res.data;
+    histPage = data.number;
+    histTotalPages = data.totalPages;
+    renderHistorial(data.content);
+    renderPagination('paginacion-historial', histPage, histTotalPages, p => cargarHistorial(p));
+  } catch(err) { showToast(err.message, 'danger'); } finally { hideSpinner(); }
+}
+
+function renderHistorial(prestamos) {
+  const tbody = document.getElementById('tabla-historial');
+  if (!prestamos || !prestamos.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="bi bi-arrow-left-right"></i>Sin préstamos</td></tr>';
+    return;
+  }
+  tbody.innerHTML = prestamos.map(p => `
+    <tr>
+      <td>${p.id}</td>
+      <td>${p.usuarioNombre || '-'}</td>
+      <td>${formatDate(p.fechaPrestamo)}</td>
+      <td>${formatDate(p.fechaDevolucion)}</td>
+      <td><span class="badge-${p.estado?.toLowerCase()}">${p.estado}</span></td>
+      <td>
+        ${p.estado === 'ACTIVO'
+          ? `<button class="btn btn-sm btn-outline-success me-1" onclick="devolver(${p.id})">
+               <i class="bi bi-check-lg me-1"></i>Devolver
+             </button>` : ''}
+        ${usuario && usuario.rol === 'ADMIN'
+          ? `<button class="btn btn-sm btn-outline-danger" onclick="eliminarPrestamo(${p.id})">
+               <i class="bi bi-trash"></i>
+             </button>` : ''}
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('btn-filtrar').addEventListener('click', () => cargarHistorial(0));
+
+window.devolver = async (id) => {
+  showSpinner();
+  try {
+    await PrestamoService.devolver(id);
+    showToast('Préstamo devuelto correctamente');
+    cargarHistorial(histPage);
+  } catch(err) { showToast(err.message, 'danger'); } finally { hideSpinner(); }
+};
+
+window.eliminarPrestamo = async (id) => {
+  if (!await confirmDelete('préstamo #' + id)) return;
+  showSpinner();
+  try {
+    await PrestamoService.eliminar(id);
+    showToast('Préstamo eliminado');
+    cargarHistorial(histPage);
+  } catch(err) { showToast(err.message, 'danger'); } finally { hideSpinner(); }
+};
+</script>
+</body>
+</html>
