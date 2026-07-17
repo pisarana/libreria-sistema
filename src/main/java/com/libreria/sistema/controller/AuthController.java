@@ -67,6 +67,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Sesión cerrada correctamente"));
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<ApiResponse<String>> health() {
+        return ResponseEntity.ok(ApiResponse.success("OK"));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UsuarioResponse>> me() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
