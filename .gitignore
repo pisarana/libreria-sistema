@@ -1,0 +1,29 @@
+# ── Maven ──────────────────────────────────────────────────────
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.jar
+*.war
+
+# ── IntelliJ IDEA ──────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ── Variables de entorno (nunca al repositorio) ─────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Sistema operativo ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ───────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Spring Boot ────────────────────────────────────────────────
+spring-shell.log
