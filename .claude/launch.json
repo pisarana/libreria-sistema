@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "libreria-app",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "echo Server already running on 8080"],
+      "port": 8080
+    }
+  ]
+}

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario — Librería</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<div class="wrapper">
+  <aside class="sidebar" id="sidebar-container"></aside>
+  <div class="main-content">
+    <header class="topbar" id="topbar-container"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <h1><i class="bi bi-boxes me-2 text-primary"></i>Inventario</h1>
+      </div>
+
+      <!-- Alertas bajo stock -->
+      <div id="alertas-container" class="mb-3"></div>
+
+      <!-- Buscador -->
+      <div class="card mb-3">
+        <div class="card-body py-2">
+          <div class="search-bar">
+            <input type="text" class="form-control" id="input-busqueda" placeholder="Buscar libro...">
+            <button class="btn btn-outline-secondary" id="btn-buscar"><i class="bi bi-search"></i></button>
+            <button class="btn btn-outline-secondary" id="btn-limpiar">Limpiar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla inventario -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr><th>ID</th><th>Título</th><th>Autor</th><th>Categoría</th><th>ISBN</th><th>Stock</th><th>Nivel</th><th>Acciones</th></tr>
+              </thead>
+              <tbody id="tabla-inventario">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 d-flex justify-content-center" id="paginacion"></div>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+import { api, showToast, showSpinner, hideSpinner, renderPagination } from '/js/utils.js';
+import { renderSidebar } from '/js/components/sidebar.js';
+import { renderNavbar } from '/js/components/navbar.js';
+import Validators from '/js/validators.js';
+import InventarioService from '/js/services/inventarioService.js';
+
+let usuario = null;
+let currentPage = 0;
+let totalPages = 0;
+let busqueda = '';
+
+(async () => {
+  try {
+    const res = await api('/api/auth/me');
+    if (res && res.data) { usuario = res.data; sessionStorage.setItem('usuario', JSON.stringify(usuario)); }
+  } catch(_) { window.location.href = '/index.html'; return; }
+
+  renderSidebar(usuario);
+  renderNavbar('Inventario', usuario);
+  await Promise.all([cargarAlertas(), cargarInventario()]);
+})();
+
+async function cargarAlertas() {
+  try {
+    const res = await InventarioService.alertas();
+    const libros = res.data || [];
+    const container = document.getElementById('alertas-container');
+    if (!libros.length) { container.innerHTML = ''; return; }
+    container.innerHTML = `
+      <div class="alert alert-warning d-flex align-items-start gap-2 mb-0">
+        <i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
+        <div>
+          <strong>${libros.length} libro(s) con stock bajo (≤5):</strong>
+          <div class="mt-1 d-flex flex-wrap gap-2">
+            ${libros.map(l => `
+              <span class="badge bg-warning text-dark">
+                ${l.titulo} <span class="badge bg-danger ms-1">${l.stock}</span>
+              </span>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  } catch(_) {}
+}
+
+async function cargarInventario(page = 0) {
+  showSpinner();
+  try {
+    const params = { page, size: 10 };
+    if (busqueda) params.busqueda = busqueda;
+    const res = await InventarioService.listar(params);
+    const data = res.data;
+    currentPage = data.number;
+    totalPages = data.totalPages;
+    renderTabla(data.content);
+    renderPagination('paginacion', currentPage, totalPages, p => cargarInventario(p));
+  } catch(err) { showToast(err.message, 'danger'); } finally { hideSpinner(); }
+}
+
+function stockBar(stock) {
+  const max = 50;
+  const pct = Math.min(100, Math.round((stock / max) * 100));
+  const color = stock <= 5 ? 'bg-danger' : stock <= 15 ? 'bg-warning' : 'bg-success';
+  return `<div class="progress progress-sm" style="width:80px;">
+    <div class="progress-bar ${color}" style="width:${pct}%"></div>
+  </div>`;
+}
+
+function renderTabla(libros) {
+  const tbody = document.getElementById('tabla-inventario');
+  if (!libros || !libros.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-boxes"></i>Sin libros</td></tr>';
+    return;
+  }
+  tbody.innerHTML = libros.map(l => `
+    <tr>
+      <td>${l.id}</td>
+      <td><strong>${l.titulo}</strong></td>
+      <td>${l.autorNombre || '-'}</td>
+      <td>${l.categoriaNombre || '-'}</td>
+      <td><code>${l.isbn}</code></td>
+      <td>
+        ${l.stock <= 5
+          ? `<span class="badge bg-danger">${l.stock}</span>`
+          : l.stock <= 15
+            ? `<span class="badge bg-warning text-dark">${l.stock}</span>`
+            : `<span class="badge bg-success">${l.stock}</span>`}
+      </td>
+      <td>${stockBar(l.stock)}</td>
+      <td>
+        ${usuario && usuario.rol === 'ADMIN'
+          ? `<button class="btn btn-sm btn-outline-primary" onclick="ajustar(${l.id}, '${l.titulo.replace(/'/g,"\\'")}', ${l.stock})">
+               <i class="bi bi-sliders me-1"></i>Ajustar
+             </button>` : '-'}
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('btn-buscar').addEventListener('click', () => { busqueda = document.getElementById('input-busqueda').value.trim(); cargarInventario(0); });
+document.getElementById('input-busqueda').addEventListener('keydown', e => { if (e.key === 'Enter') { busqueda = e.target.value.trim(); cargarInventario(0); } });
+document.getElementById('btn-limpiar').addEventListener('click', () => { busqueda = ''; document.getElementById('input-busqueda').value = ''; cargarInventario(0); });
+
+window.ajustar = (id, titulo, stockActual) => {
+  const modalId = 'modal-stock';
+  const existing = document.getElementById(modalId);
+  if (existing) existing.remove();
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="modal fade" id="${modalId}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Ajustar Stock — ${titulo}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted mb-3">Stock actual: <strong>${stockActual}</strong></p>
+            <form id="form-stock" novalidate>
+              <div class="mb-3">
+                <label class="form-label">Cantidad a ajustar *</label>
+                <input type="number" class="form-control" id="stk-cantidad" placeholder="Positivo para añadir, negativo para reducir">
+                <div class="form-text">Ej: +10 para añadir, -5 para reducir</div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Motivo</label>
+                <input type="text" class="form-control" id="stk-motivo" placeholder="Ej: Compra de ejemplares, pérdida...">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btn-guardar-stock">Aplicar</button>
+          </div>
+        </div>
+      </div>
+    </div>`);
+
+  const modalEl = document.getElementById(modalId);
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+  modalEl.addEventListener('hidden.bs.modal', () => modalEl.remove());
+
+  document.getElementById('btn-guardar-stock').addEventListener('click', async () => {
+    Validators.clearAllErrors('form-stock');
+    const cantidadVal = document.getElementById('stk-cantidad').value;
+    if (!cantidadVal || isNaN(cantidadVal)) {
+      Validators.showFieldError('stk-cantidad', 'Ingresa una cantidad válida');
+      return;
+    }
+    const cantidad = parseInt(cantidadVal);
+    const motivo = document.getElementById('stk-motivo').value;
+
+    showSpinner();
+    try {
+      await InventarioService.ajustarStock(id, cantidad, motivo);
+      showToast('Stock ajustado correctamente');
+      modal.hide();
+      await Promise.all([cargarAlertas(), cargarInventario(currentPage)]);
+    } catch(err) { showToast(err.message, 'danger'); } finally { hideSpinner(); }
+  });
+};
+</script>
+</body>
+</html>
