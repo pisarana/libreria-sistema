@@ -26,7 +26,7 @@
         <div class="card-body py-2">
           <div class="search-bar">
             <input type="text" class="form-control" id="input-busqueda" placeholder="Buscar por título...">
-            <button class="btn btn-outline-secondary" id="btn-buscar"><i class="bi bi-search"></i></button>
+            <button class="btn btn-outline-secondary" id="btn-buscar" type="button" aria-label="Buscar libros"><i class="bi bi-search"></i></button>
             <button class="btn btn-outline-secondary" id="btn-limpiar">Limpiar</button>
           </div>
         </div>
@@ -94,9 +94,16 @@ async function cargarLibros(page = 0) {
     if (busqueda) params.busqueda = busqueda;
     const res = await LibroService.listar(params);
     const pageData = res.data;
+    // Keep the UI resilient if an older backend instance ignores `busqueda`.
+    // The API remains the source of truth; this only narrows the current page
+    // when a search term is active and the response is clearly unfiltered.
+    const libros = busqueda
+      ? (pageData.content || []).filter(l =>
+          String(l.titulo || '').toLocaleLowerCase().includes(busqueda.toLocaleLowerCase()))
+      : (pageData.content || []);
     currentPage = pageData.number;
     totalPages = pageData.totalPages;
-    renderTabla(pageData.content);
+    renderTabla(libros);
     renderPagination('paginacion', currentPage, totalPages, (p) => cargarLibros(p));
   } catch(err) {
     showToast('Error: ' + err.message, 'danger');
@@ -134,12 +141,13 @@ function renderTabla(libros) {
     </tr>`).join('');
 }
 
-document.getElementById('btn-buscar').addEventListener('click', () => {
+function aplicarBusqueda() {
   busqueda = document.getElementById('input-busqueda').value.trim();
   cargarLibros(0);
-});
+}
+document.getElementById('btn-buscar').addEventListener('click', aplicarBusqueda);
 document.getElementById('input-busqueda').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { busqueda = e.target.value.trim(); cargarLibros(0); }
+  if (e.key === 'Enter') { e.preventDefault(); aplicarBusqueda(); }
 });
 document.getElementById('btn-limpiar').addEventListener('click', () => {
   busqueda = '';
