@@ -16,7 +16,7 @@ function renderSidebar(usuario) {
       const isActive = currentPath.endsWith(item.href.replace('/', '')) || currentPath === item.href;
       return `
         <li class="nav-item">
-          <a href="${item.href}" class="nav-link ${isActive ? 'active' : ''}">
+          <a href="${item.href}" class="nav-link ${isActive ? 'active' : ''}" ${isActive ? 'aria-current="page"' : ''}>
             <i class="bi ${item.icon}"></i>
             <span>${item.label}</span>
           </a>
@@ -26,7 +26,7 @@ function renderSidebar(usuario) {
   const html = `
     <div class="sidebar-brand">
       <img src="/assets/img/logo.svg" alt="Logo" onerror="this.style.display='none'">
-      <span style="color:#fff;font-weight:700;font-size:1.05rem;margin-left:0.5rem;">Librería</span>
+      <span class="sidebar-brand-name">Librería</span>
     </div>
     <nav class="sidebar-nav">
       <p class="sidebar-section-title">Menú principal</p>
@@ -41,7 +41,11 @@ function renderSidebar(usuario) {
   const toggler = document.getElementById('sidebar-toggler');
   const sidebar = document.querySelector('.sidebar');
   if (toggler && sidebar) {
-    toggler.addEventListener('click', () => sidebar.classList.toggle('open'));
+    toggler.addEventListener('click', () => {
+      const open = sidebar.classList.toggle('open');
+      toggler.setAttribute('aria-expanded', String(open));
+      toggler.setAttribute('aria-label', open ? 'Cerrar navegación' : 'Abrir navegación');
+    });
   }
 }
 

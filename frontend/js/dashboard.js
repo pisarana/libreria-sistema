@@ -112,7 +112,7 @@ function renderGrafico(data) {
         label: 'Préstamos',
         data: values,
         backgroundColor: 'rgba(37, 99, 235, 0.8)',
-        borderColor: '#2563EB',
+        borderColor: '#B4483F',
         borderWidth: 1,
         borderRadius: 6,
       }]

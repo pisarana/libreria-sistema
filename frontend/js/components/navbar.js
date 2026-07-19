@@ -11,7 +11,7 @@ function renderNavbar(titulo, usuario) {
 
   const html = `
     <div class="d-flex align-items-center gap-2">
-      <button class="btn btn-sm btn-outline-secondary d-md-none border-0" id="sidebar-toggler">
+      <button class="btn btn-sm btn-outline-secondary d-md-none border-0" id="sidebar-toggler" aria-label="Abrir navegación" aria-expanded="false">
         <i class="bi bi-list fs-5"></i>
       </button>
       <span class="topbar-title">${titulo}</span>
@@ -19,12 +19,12 @@ function renderNavbar(titulo, usuario) {
     <div class="d-flex align-items-center gap-3">
       <div class="user-badge dropdown">
         <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" style="cursor:pointer;">
-          <div class="user-avatar">${iniciales}</div>
+          <div class="user-avatar" aria-hidden="true">${iniciales}</div>
           <div class="d-none d-sm-block">
             <div style="font-size:0.85rem;font-weight:600;">${nombre}</div>
             <div style="font-size:0.75rem;">${rolBadge}</div>
           </div>
-          <i class="bi bi-chevron-down" style="font-size:0.75rem;color:var(--color-muted);"></i>
+          <i class="bi bi-chevron-down user-menu-chevron" aria-hidden="true"></i>
         </div>
         <ul class="dropdown-menu dropdown-menu-end shadow">
           <li><span class="dropdown-item-text text-muted small">${usuario ? usuario.correo : ''}</span></li>
