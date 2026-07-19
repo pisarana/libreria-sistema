@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
     CONSTRAINT uq_usuario_correo    UNIQUE (correo),
     CONSTRAINT chk_usuario_rol      CHECK (rol IN ('ADMIN', 'EMPLEADO')),
-    CONSTRAINT chk_usuario_correo   CHECK (correo ~* '^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$'),
+    CONSTRAINT chk_usuario_correo   CHECK (correo LIKE '%@%'),
     CONSTRAINT chk_usuario_nombre   CHECK (LENGTH(TRIM(nombre)) > 0)
 );
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS detalle_prestamos (
     CONSTRAINT fk_detalle_prestamo  FOREIGN KEY (prestamo_id)
         REFERENCES prestamos(id)    ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_detalle_libro     FOREIGN KEY (libro_id)
-        REFERENCES libros(id)       ON DELETE RESTRICT ON UPDATE CASCADE,
+        REFERENCES libros(id)       ON DELETE CASCADE ON UPDATE CASCADE,
     fecha_creacion      TIMESTAMP   NOT NULL DEFAULT NOW(),
     fecha_actualizacion TIMESTAMP   NOT NULL DEFAULT NOW(),
 

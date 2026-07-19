@@ -60,6 +60,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Driver H2 para ejecución local -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Lombok: reduce boilerplate en entidades y DTOs -->
         <dependency>
             <groupId>org.projectlombok</groupId>

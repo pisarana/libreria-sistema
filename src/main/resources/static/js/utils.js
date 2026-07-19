@@ -1,4 +1,9 @@
 async function api(url, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  const csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('XSRF-TOKEN='))
+    ?.split('=')[1];
   const defaults = {
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include'
@@ -6,7 +11,13 @@ async function api(url, options = {}) {
   const config = {
     ...defaults,
     ...options,
-    headers: { ...defaults.headers, ...(options.headers || {}) }
+    headers: {
+      ...defaults.headers,
+      ...(csrfToken && !['GET', 'HEAD', 'OPTIONS'].includes(method)
+        ? { 'X-XSRF-TOKEN': decodeURIComponent(csrfToken) }
+        : {}),
+      ...(options.headers || {})
+    }
   };
   const res = await fetch(url, config);
   if (res.status === 401) {

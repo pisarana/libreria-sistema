@@ -29,6 +29,7 @@ public class Prestamo extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado")
+    @Builder.Default
     private EstadoPrestamo estado = EstadoPrestamo.ACTIVO;
 
     @Column(name = "observaciones")

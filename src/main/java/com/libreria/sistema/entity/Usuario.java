@@ -34,6 +34,7 @@ public class Usuario extends BaseEntity {
     private Rol rol;
 
     @Column(name = "estado")
+    @Builder.Default
     private boolean estado = true;
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)

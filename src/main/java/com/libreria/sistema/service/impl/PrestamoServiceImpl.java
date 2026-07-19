@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,16 +73,27 @@ public class PrestamoServiceImpl implements PrestamoService {
                 .observaciones(request.getObservaciones())
                 .build();
 
+        Map<Long, Integer> cantidadesPorLibro = new LinkedHashMap<>();
         for (DetallePrestamoRequest detReq : request.getDetalles()) {
-            Libro libro = libroRepository.findById(detReq.getLibroId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Libro no encontrado con id: " + detReq.getLibroId()));
-
             int cantidad = detReq.getCantidad() != null ? detReq.getCantidad() : 1;
+            cantidadesPorLibro.merge(detReq.getLibroId(), cantidad, Integer::sum);
+        }
+
+        Map<Long, Libro> librosPorId = new LinkedHashMap<>();
+        for (Map.Entry<Long, Integer> entry : cantidadesPorLibro.entrySet()) {
+            Libro libro = libroRepository.findByIdForUpdate(entry.getKey())
+                    .orElseThrow(() -> new ResourceNotFoundException("Libro no encontrado con id: " + entry.getKey()));
+            int cantidad = entry.getValue();
             if (libro.getStock() < cantidad) {
                 throw new StockInsuficienteException(
                         "Stock insuficiente para '" + libro.getTitulo() + "'. Disponible: " + libro.getStock());
             }
+            librosPorId.put(entry.getKey(), libro);
+        }
 
+        for (DetallePrestamoRequest detReq : request.getDetalles()) {
+            Libro libro = librosPorId.get(detReq.getLibroId());
+            int cantidad = detReq.getCantidad() != null ? detReq.getCantidad() : 1;
             libro.actualizarStock(-cantidad);
             libroRepository.save(libro);
 

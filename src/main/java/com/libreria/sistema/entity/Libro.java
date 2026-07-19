@@ -25,9 +25,11 @@ public class Libro extends BaseEntity {
     private BigDecimal precio;
 
     @Column(name = "stock", columnDefinition = "INTEGER DEFAULT 0")
+    @Builder.Default
     private Integer stock = 0;
 
     @Column(name = "stock_minimo")
+    @Builder.Default
     private Integer stockMinimo = 3;
 
     @Column(name = "fecha_publicacion")

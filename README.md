@@ -150,6 +150,7 @@ libreria-sistema/
 ## API REST — Endpoints principales
 
 Todos los endpoints (excepto `/api/auth/**`) requieren sesión activa.
+Las operaciones mutables usan protección CSRF mediante la cookie `XSRF-TOKEN`; el frontend la envía automáticamente como `X-XSRF-TOKEN`.
 
 | Método | Endpoint | Descripción |
 |---|---|---|
@@ -182,3 +183,17 @@ Todos los endpoints (excepto `/api/auth/**`) requieren sesión activa.
 - [x] Gestión de Préstamos (registro + historial)
 - [x] Inventario (vista de stock + alertas)
 - [x] Actualización automática de stock al registrar préstamo
+- [x] Protección de sesión con cookies HttpOnly/SameSite y CSRF
+- [x] Validación de paginación y bloqueo de stock durante préstamos
+- [x] Pruebas unitarias de inventario/préstamos y CI con Java 21
+
+## Verificación rápida
+
+```bash
+./mvnw test
+./mvnw verify
+```
+
+Para producción, reemplaza todas las credenciales de ejemplo y configura
+`DATABASE_URL`, `DATABASE_USERNAME` y `DATABASE_PASSWORD` como variables del
+servicio. Las contraseñas de la tabla de demo solo sirven para desarrollo local.

@@ -17,8 +17,7 @@ INSERT INTO autores (nombre, apellido, nacionalidad) VALUES
     ('Octavio',  'Paz',              'Mexicana'),
     ('Carlos',   'Fuentes',          'Mexicana'),
     ('Roberto',  'Bolaño',           'Chilena'),
-    ('Juan',     'Rulfo',            'Mexicana')
-ON CONFLICT DO NOTHING;
+    ('Juan',     'Rulfo',            'Mexicana');
 
 -- ── CATEGORIAS ─────────────────────────────────────────────────
 INSERT INTO categorias (nombre, descripcion) VALUES
@@ -28,8 +27,7 @@ INSERT INTO categorias (nombre, descripcion) VALUES
     ('Filosofía',        'Pensamiento clásico y contemporáneo'),
     ('Tecnología',       'Programación, sistemas y ciencias de la computación'),
     ('Autoayuda',        'Desarrollo personal y productividad'),
-    ('Infantil',         'Literatura para niños y jóvenes')
-ON CONFLICT DO NOTHING;
+    ('Infantil',         'Literatura para niños y jóvenes');
 
 -- ── LIBROS ─────────────────────────────────────────────────────
 -- autor_id: 1=García Márquez, 2=Vargas Llosa, 3=Allende, 4=Borges
@@ -46,37 +44,33 @@ INSERT INTO libros (titulo, isbn, precio, stock, descripcion, autor_id, categori
     ('2666',                       '9780312429218', 55.00, 7,  'Épica narrativa sobre crímenes en una ciudad fronteriza.',     9, 1),
     ('Pedro Páramo',               '9788420471853', 28.00, 11, 'Un hombre busca a su padre en un pueblo fantasma.',           10, 1),
     ('Conversación en La Catedral','9788420471846', 48.00, 1,  'Cuatro horas de conversación que retratan una época.',        2, 1),
-    ('El nombre de la rosa',       '9780156001311', 52.00, 5,  'Misterio medieval en una abadía benedictina.',                4, 3)
-ON CONFLICT DO NOTHING;
+    ('El nombre de la rosa',       '9780156001311', 52.00, 5,  'Misterio medieval en una abadía benedictina.',                4, 3);
 
 -- ── USUARIOS ───────────────────────────────────────────────────
 -- Contraseñas hasheadas con BCrypt (rounds=10)
 -- admin@libreria.com     → admin123
 -- maria@libreria.com     → empleado123
 -- carlos@libreria.com    → empleado123
--- Todos los usuarios usan contraseña: admin123
 -- Hash generado con BCryptPasswordEncoder(10)
 INSERT INTO usuarios (nombre, apellido, correo, password, rol, estado) VALUES
-    ('Administrador', 'Sistema',   'admin@libreria.com',   '$2a$10$sYDhqiymScGDu3.EfgvZaOEnzewRWcp6p9PYTsY3PRkp/xiBMOc1y', 'ADMIN',    TRUE),
-    ('María',         'González',  'maria@libreria.com',   '$2a$10$sYDhqiymScGDu3.EfgvZaOEnzewRWcp6p9PYTsY3PRkp/xiBMOc1y', 'EMPLEADO', TRUE),
-    ('Carlos',        'Rodríguez', 'carlos@libreria.com',  '$2a$10$sYDhqiymScGDu3.EfgvZaOEnzewRWcp6p9PYTsY3PRkp/xiBMOc1y', 'EMPLEADO', TRUE),
-    ('Lucía',         'Fernández', 'lucia@libreria.com',   '$2a$10$sYDhqiymScGDu3.EfgvZaOEnzewRWcp6p9PYTsY3PRkp/xiBMOc1y', 'EMPLEADO', FALSE)
-ON CONFLICT DO NOTHING;
+    ('Administrador', 'Sistema',   'admin@libreria.com',   '$2a$10$kAfz03Sy5skYvKQhLH0YouX0GVyl/nWA24EdV.A54YvlmdGhrDgR6', 'ADMIN',    TRUE),
+    ('María',         'González',  'maria@libreria.com',   '$2a$10$RFA22Vu1tbhwHEIAL7i0UuiDowIAMxGasTjGvgJINKS4EaqLOOvJG', 'EMPLEADO', TRUE),
+    ('Carlos',        'Rodríguez', 'carlos@libreria.com',  '$2a$10$RFA22Vu1tbhwHEIAL7i0UuiDowIAMxGasTjGvgJINKS4EaqLOOvJG', 'EMPLEADO', TRUE),
+    ('Lucía',         'Fernández', 'lucia@libreria.com',   '$2a$10$RFA22Vu1tbhwHEIAL7i0UuiDowIAMxGasTjGvgJINKS4EaqLOOvJG', 'EMPLEADO', FALSE);
 
 -- ── PRESTAMOS ──────────────────────────────────────────────────
 -- Préstamos distribuidos en los últimos 6 meses (datos para el gráfico)
 INSERT INTO prestamos (usuario_id, fecha_prestamo, fecha_devolucion, estado, observaciones) VALUES
-    (2, CURRENT_DATE - INTERVAL '150 days', CURRENT_DATE - INTERVAL '143 days', 'DEVUELTO', 'Devolución en buen estado'),
-    (3, CURRENT_DATE - INTERVAL '120 days', CURRENT_DATE - INTERVAL '113 days', 'DEVUELTO', NULL),
-    (2, CURRENT_DATE - INTERVAL '90 days',  CURRENT_DATE - INTERVAL '83 days',  'DEVUELTO', 'Devolución con leve deterioro en cubierta'),
-    (3, CURRENT_DATE - INTERVAL '60 days',  CURRENT_DATE - INTERVAL '53 days',  'DEVUELTO', NULL),
-    (2, CURRENT_DATE - INTERVAL '45 days',  CURRENT_DATE - INTERVAL '38 days',  'DEVUELTO', NULL),
-    (3, CURRENT_DATE - INTERVAL '30 days',  CURRENT_DATE - INTERVAL '23 days',  'DEVUELTO', NULL),
-    (2, CURRENT_DATE - INTERVAL '20 days',  NULL,                                'VENCIDO',  'Pendiente de devolución'),
-    (3, CURRENT_DATE - INTERVAL '10 days',  NULL,                                'ACTIVO',   'Primera semana'),
-    (2, CURRENT_DATE - INTERVAL '5 days',   NULL,                                'ACTIVO',   NULL),
-    (3, CURRENT_DATE,                        NULL,                                'ACTIVO',   'Préstamo de hoy')
-ON CONFLICT DO NOTHING;
+    (2, DATEADD('DAY', -150, CURRENT_DATE), DATEADD('DAY', -143, CURRENT_DATE), 'DEVUELTO', 'Devolución en buen estado'),
+    (3, DATEADD('DAY', -120, CURRENT_DATE), DATEADD('DAY', -113, CURRENT_DATE), 'DEVUELTO', NULL),
+    (2, DATEADD('DAY', -90, CURRENT_DATE),  DATEADD('DAY', -83, CURRENT_DATE),  'DEVUELTO', 'Devolución con leve deterioro en cubierta'),
+    (3, DATEADD('DAY', -60, CURRENT_DATE),  DATEADD('DAY', -53, CURRENT_DATE),  'DEVUELTO', NULL),
+    (2, DATEADD('DAY', -45, CURRENT_DATE),  DATEADD('DAY', -38, CURRENT_DATE),  'DEVUELTO', NULL),
+    (3, DATEADD('DAY', -30, CURRENT_DATE),  DATEADD('DAY', -23, CURRENT_DATE),  'DEVUELTO', NULL),
+    (2, DATEADD('DAY', -20, CURRENT_DATE),  NULL,                                'VENCIDO',  'Pendiente de devolución'),
+    (3, DATEADD('DAY', -10, CURRENT_DATE),  NULL,                                'ACTIVO',   'Primera semana'),
+    (2, DATEADD('DAY', -5, CURRENT_DATE),   NULL,                                'ACTIVO',   NULL),
+    (3, CURRENT_DATE,                        NULL,                                'ACTIVO',   'Préstamo de hoy');
 
 -- ── DETALLE_PRESTAMOS ──────────────────────────────────────────
 INSERT INTO detalle_prestamos (prestamo_id, libro_id, cantidad) VALUES
@@ -89,7 +83,6 @@ INSERT INTO detalle_prestamos (prestamo_id, libro_id, cantidad) VALUES
     (7, 1, 1),
     (8, 3, 1), (8, 5, 1),
     (9, 2, 1),
-    (10, 8, 1), (10, 6, 1)
-ON CONFLICT DO NOTHING;
+    (10, 8, 1), (10, 6, 1);
 
 -- Stock ya refleja préstamos activos en los INSERT anteriores (idempotente)

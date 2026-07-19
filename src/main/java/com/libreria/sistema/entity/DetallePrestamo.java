@@ -23,8 +23,10 @@ public class DetallePrestamo extends BaseEntity {
     private Libro libro;
 
     @Column(name = "cantidad")
+    @Builder.Default
     private Integer cantidad = 1;
 
     @Column(name = "precio_unitario", nullable = false)
+    @Builder.Default
     private BigDecimal precioUnitario = BigDecimal.ZERO;
 }

@@ -27,3 +27,8 @@ logs/
 
 # ── Spring Boot ────────────────────────────────────────────────
 spring-shell.log
+
+# ── Antigravity / local runtime ───────────────────────────────
+graphify-out/
+cookie.txt
+*.db

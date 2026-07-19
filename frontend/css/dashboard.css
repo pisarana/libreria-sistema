@@ -1,44 +1,289 @@
-.wrapper { display: flex; min-height: 100vh; }
+/* ================================================================
+   dashboard.css — grid, tarjetas de estadística, sección de gráficos
+   Mismo lenguaje que styles.css: tinta + latón, sin glassmorphism
+   ================================================================ */
 
-.sidebar { width: var(--sidebar-width); background: var(--color-sidebar); position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 100; transition: transform 0.3s; }
-.sidebar-brand { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.sidebar-brand img { height: 36px; filter: brightness(0) invert(1); }
-.sidebar-nav { padding: 1rem 0; }
-.sidebar-nav .nav-item { margin: 0.125rem 0.75rem; }
-.sidebar-nav .nav-link { color: var(--color-sidebar-text); border-radius: 6px; padding: 0.6rem 0.875rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; transition: all 0.15s; text-decoration: none; }
-.sidebar-nav .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.sidebar-nav .nav-link.active { background: var(--color-primary); color: #fff; }
-.sidebar-nav .nav-link i { font-size: 1.1rem; width: 1.25rem; }
-.sidebar-section-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; padding: 0.75rem 1.5rem 0.25rem; }
+/* ── Topbar search / breadcrumb zone ─────────────────────────── */
+.topbar-breadcrumb {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--ink-400);
+  margin-top: 0.125rem;
+  letter-spacing: 0.01em;
+}
 
-.main-content { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-.topbar { height: var(--navbar-height); background: var(--color-white); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 99; box-shadow: var(--shadow); }
-.topbar-title { font-weight: 600; font-size: 1.1rem; }
-.user-badge { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem; }
+/* ── Page header tag — catalog label, not a gradient pill ──────── */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: transparent;
+  color: var(--brass-dark);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.3em 0.7em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--brass);
+}
 
-.page-content { padding: 1.75rem; flex: 1; }
+/* ── Dashboard grid ───────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
 
-.stat-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.25rem; display: flex; align-items: center; gap: 1rem; box-shadow: var(--shadow); }
-.stat-icon { width: 52px; height: 52px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
-.stat-icon.blue { background: #EFF6FF; color: #2563EB; }
-.stat-icon.green { background: #F0FDF4; color: #16A34A; }
-.stat-icon.orange { background: #FFF7ED; color: #EA580C; }
-.stat-icon.purple { background: #FAF5FF; color: #7C3AED; }
-.stat-icon.teal { background: #F0FDFA; color: #0D9488; }
-.stat-icon.red { background: #FEF2F2; color: #DC2626; }
-.stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1; }
-.stat-label { font-size: 0.8rem; color: var(--color-muted); margin-top: 0.2rem; }
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-.section-title { font-weight: 600; font-size: 1rem; }
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-.page-header h1 { font-size: 1.35rem; font-weight: 700; }
+/* ── Trend badge — ledger annotation, text-first not pill-first ── */
+.trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+  margin-top: 0.375rem;
+}
 
-.search-bar { display: flex; gap: 0.5rem; }
-.search-bar input { min-width: 220px; }
+.trend-up {
+  background: var(--stamp-green-tint);
+  color: var(--stamp-green);
+}
 
-.stock-low { color: var(--color-danger); font-weight: 600; }
+.trend-down {
+  background: var(--stamp-red-tint);
+  color: var(--stamp-red);
+}
 
-.progress-sm { height: 6px; border-radius: 3px; }
+.trend-neu {
+  background: var(--ink-100);
+  color: var(--ink-500);
+}
+
+/* ── Chart card ───────────────────────────────────────────────── */
+.chart-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: box-shadow var(--duration);
+}
+
+.chart-card:hover {
+  box-shadow: var(--shadow-raised);
+}
+
+.chart-card .card-body {
+  padding: 1.375rem;
+}
+
+.chart-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  display: inline-block;
+  margin-right: 0.375rem;
+}
+
+/* ── Activity list — ledger entries ──────────────────────────── */
+.activity-list {
+  list-style: none;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--ink-100);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  margin-top: 0.45rem;
+  flex-shrink: 0;
+  transform: rotate(45deg);
+}
+
+.activity-dot.green {
+  background: var(--stamp-green);
+}
+
+.activity-dot.blue {
+  background: var(--stamp-blue);
+}
+
+.activity-dot.red {
+  background: var(--stamp-red);
+}
+
+/* ── Sparkline mini ───────────────────────────────────────────── */
+.sparkline {
+  height: 34px;
+  margin-top: 0.25rem;
+  opacity: 0.75;
+}
+
+/* ── Table toolbar ────────────────────────────────────────────── */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--ink-100);
+  background: var(--ink-50);
+}
+
+/* ── Row action buttons — square, no scale-hover gimmick ───────── */
+.action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ink-200);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background var(--duration), border-color var(--duration);
+  background: transparent;
+  color: var(--ink-500);
+}
+
+.action-btn:hover {
+  background: var(--ink-50);
+}
+
+.action-btn.edit {
+  color: var(--stamp-blue);
+}
+
+.action-btn.edit:hover {
+  background: var(--stamp-blue-tint);
+  border-color: var(--stamp-blue);
+}
+
+.action-btn.delete {
+  color: var(--stamp-red);
+}
+
+.action-btn.delete:hover {
+  background: var(--stamp-red-tint);
+  border-color: var(--stamp-red);
+}
+
+.action-btn.view {
+  color: var(--stamp-green);
+}
+
+.action-btn.view:hover {
+  background: var(--stamp-green-tint);
+  border-color: var(--stamp-green);
+}
+
+/* ── Pagination ───────────────────────────────────────────────── */
+.pagination {
+  gap: 0.25rem;
+}
+
+.page-link {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--ink-200);
+  color: var(--ink-600);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78125rem;
+  font-weight: 500;
+  transition: all var(--duration-fast);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-link:hover {
+  background: var(--ink-50);
+  border-color: var(--ink-300);
+  color: var(--ink-950);
+}
+
+.page-item.active .page-link {
+  background: var(--ink-950);
+  border-color: var(--ink-950);
+  color: var(--brass-light);
+}
+
+.page-item.disabled .page-link {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Stock progress bar ───────────────────────────────────────── */
+.stock-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.stock-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--ink-100);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.stock-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.4s var(--ease);
+}
+
+.stock-bar-fill.ok {
+  background: var(--stamp-green);
+}
+
+.stock-bar-fill.warning {
+  background: var(--stamp-amber);
+}
+
+.stock-bar-fill.danger {
+  background: var(--stamp-red);
+}
+
+/* ── Responsive sidebar padding ──────────────────────────────── */
+@media (max-width: 768px) {
+  .page-content {
+    padding: 1rem;
+  }
+
+  .topbar {
+    padding: 0 1rem;
+  }
+}

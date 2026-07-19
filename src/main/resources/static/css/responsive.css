@@ -1,16 +1,53 @@
+/* ================================================================
+   responsive.css — breakpoints móviles
+   ================================================================ */
 @media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
-  .main-content { margin-left: 0; }
-  .topbar { padding: 0 1rem; }
-  .page-content { padding: 1rem; }
-  .stat-card { padding: 1rem; }
-  .table-responsive { font-size: 0.85rem; }
-  .search-bar input { min-width: 140px; }
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .topbar {
+    padding: 0 1rem;
+  }
+
+  .page-content {
+    padding: 1rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+    border-left-width: 3px;
+  }
+
+  .table-responsive {
+    font-size: 0.85rem;
+  }
+
+  .search-bar input {
+    min-width: 140px;
+  }
 }
 
 @media (max-width: 576px) {
-  .stat-value { font-size: 1.4rem; }
-  .hide-mobile { display: none !important; }
-  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 }

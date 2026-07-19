@@ -1,42 +1,742 @@
+/* ================================================================
+   SISTEMA — styles.css
+   Ficha de catálogo · tinta + latón sobre papel · sin glassmorphism
+   ================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/* ── Tokens ─────────────────────────────────────────────────── */
 :root {
-  --color-primary: #2563EB;
-  --color-primary-dark: #1D4ED8;
-  --color-bg: #F8FAFC;
-  --color-sidebar: #1E293B;
-  --color-sidebar-active: #2563EB;
-  --color-sidebar-text: #CBD5E1;
-  --color-white: #FFFFFF;
-  --color-border: #E2E8F0;
-  --color-text: #0F172A;
-  --color-muted: #64748B;
-  --color-danger: #DC2626;
-  --color-success: #16A34A;
-  --color-warning: #D97706;
-  --sidebar-width: 260px;
+  /* Paper */
+  --paper: #F4F2EA;
+  --paper-raised: #FFFFFF;
+  --paper-sunken: #ECE9DE;
+
+  /* Ink (neutrals — green-black, not blue-grey) */
+  --ink-950: #171F1B;
+  --ink-800: #26312B;
+  --ink-700: #33403A;
+  --ink-600: #4B584F;
+  --ink-500: #616F66;
+  --ink-400: #7C8880;
+  --ink-300: #A3AB9F;
+  --ink-200: #D3D6C9;
+  --ink-100: #E4E5DB;
+  --ink-50: #EFEFE7;
+
+  /* Brass — primary accent, replaces "brand blue" */
+  --brass: #A9782F;
+  --brass-dark: #7E5A22;
+  --brass-light: #C99A4C;
+  --brass-tint: #F1E4C9;
+
+  /* Stamp colors — status semantics, ledger-ink style */
+  --stamp-green: #3F6B4F;
+  --stamp-green-tint: #E3EDE5;
+  --stamp-red: #9C3B32;
+  --stamp-red-tint: #F4E4E1;
+  --stamp-amber: #8A5A20;
+  --stamp-amber-tint: #F2E5CC;
+  --stamp-blue: #35566E;
+  --stamp-blue-tint: #E2E9EE;
+
+  /* Layout */
+  --sidebar-width: 252px;
   --navbar-height: 60px;
-  --border-radius: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --radius: 4px;
+  --radius-sm: 3px;
+  --radius-lg: 6px;
+
+  /* Shadow — flat paper, one weight only */
+  --shadow-card: 0 1px 0 rgba(23, 31, 27, 0.04), 0 1px 3px rgba(23, 31, 27, 0.06);
+  --shadow-raised: 0 2px 10px rgba(23, 31, 27, 0.10);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration: 180ms;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--color-bg); color: var(--color-text); }
+/* ── Base reset ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-.btn-primary { background: var(--color-primary); border-color: var(--color-primary); }
-.btn-primary:hover { background: var(--color-primary-dark); border-color: var(--color-primary-dark); }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-.badge-admin { background: #EFF6FF; color: #1D4ED8; padding: 0.25em 0.6em; border-radius: 4px; font-size: 0.78rem; font-weight: 600; }
-.badge-empleado { background: #F0FDF4; color: #15803D; padding: 0.25em 0.6em; border-radius: 4px; font-size: 0.78rem; font-weight: 600; }
-.badge-activo { background: #DCFCE7; color: #15803D; padding: 0.25em 0.6em; border-radius: 4px; font-size: 0.78rem; font-weight: 600; }
-.badge-devuelto { background: #F1F5F9; color: #475569; padding: 0.25em 0.6em; border-radius: 4px; font-size: 0.78rem; font-weight: 600; }
-.badge-vencido { background: #FEF2F2; color: #DC2626; padding: 0.25em 0.6em; border-radius: 4px; font-size: 0.78rem; font-weight: 600; }
+body {
+  font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
+  background: var(--paper);
+  color: var(--ink-800);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
 
-.card { border: 1px solid var(--color-border); border-radius: var(--border-radius); box-shadow: var(--shadow); }
-.table th { background: #F8FAFC; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-muted); }
-.table td { vertical-align: middle; }
+/* ── Typography ─────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--ink-950);
+}
 
-.spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.empty-state { text-align: center; padding: 3rem; color: var(--color-muted); }
-.empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+.mono,
+code,
+.stat-value,
+.table tbody td.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
 
-.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 10000; }
+code {
+  background: var(--ink-50);
+  padding: 0.15em 0.5em;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: var(--brass-dark);
+}
+
+strong {
+  font-weight: 600;
+  color: var(--ink-950);
+}
+
+a {
+  color: var(--brass-dark);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+a:hover {
+  border-bottom-color: currentColor;
+}
+
+/* ── Layout shell ───────────────────────────────────────────── */
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar — flat spine, no gradient ─────────────────────── */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--ink-950);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform var(--duration) var(--ease);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  border-right: 1px solid rgba(201, 154, 76, 0.7);
+}
+
+.sidebar-brand {
+  padding: 1.375rem 1.5rem 1.125rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-brand img {
+  height: 28px;
+  filter: brightness(0) invert(1);
+}
+
+.sidebar-brand-name {
+  color: #F4F2EA;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-nav {
+  padding: 1.25rem 0 2rem;
+}
+
+.sidebar-section-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.64rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(244, 242, 234, 0.38);
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.sidebar-nav .nav-item {
+  margin: 0.0625rem 0.875rem;
+}
+
+.sidebar-nav .nav-link {
+  color: rgba(244, 242, 234, 0.62);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color var(--duration-fast), background var(--duration-fast);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.sidebar-nav .nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-nav .nav-link i {
+  font-size: 1rem;
+  width: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sidebar-nav .nav-link.active {
+  background: rgba(169, 120, 47, 0.16);
+  border-left-color: var(--brass);
+  color: #F4F2EA;
+}
+
+/* ── Main content ───────────────────────────────────────────── */
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Topbar — flat, ruled bottom instead of blurred glass ─────── */
+.topbar {
+  height: var(--navbar-height);
+  background: var(--paper-raised);
+  border-bottom: 1px solid var(--ink-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.topbar-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  color: var(--ink-950);
+}
+
+/* User badge */
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--ink-200);
+  cursor: pointer;
+  transition: background var(--duration), border-color var(--duration);
+}
+
+.user-badge:hover {
+  background: var(--ink-50);
+  border-color: var(--ink-300);
+}
+
+.user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-800);
+}
+
+.user-role {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6875rem;
+  color: var(--ink-400);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--ink-950);
+  color: var(--brass-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 0.78125rem;
+  flex-shrink: 0;
+}
+
+/* ── Page content ───────────────────────────────────────────── */
+.page-content {
+  padding: 1.875rem;
+  flex: 1;
+}
+
+/* ── Page header ────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.125rem;
+  border-bottom: 1px solid var(--ink-200);
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.page-header h1 i {
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: var(--radius-sm);
+  background: var(--ink-950);
+  color: var(--brass-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* ── Cards — flat paper, no blur ───────────────────────────── */
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration) var(--ease);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-raised);
+}
+
+.card-body {
+  padding: 1.375rem;
+}
+
+.card-header {
+  padding: 1rem 1.375rem;
+  border-bottom: 1px solid var(--ink-100);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Stat cards — ledger row, left rule instead of gradient blob ── */
+.stat-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--ink-200);
+  border: 1px solid var(--ink-200);
+  box-shadow: var(--shadow-card);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.375rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration) var(--ease), transform var(--duration) var(--ease);
+  position: relative;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-raised);
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.stat-icon.blue {
+  background: var(--stamp-blue-tint);
+  color: var(--stamp-blue);
+}
+
+.stat-icon.green {
+  background: var(--stamp-green-tint);
+  color: var(--stamp-green);
+}
+
+.stat-icon.orange {
+  background: var(--stamp-amber-tint);
+  color: var(--stamp-amber);
+}
+
+.stat-icon.purple {
+  background: var(--brass-tint);
+  color: var(--brass-dark);
+}
+
+.stat-icon.teal {
+  background: var(--stamp-blue-tint);
+  color: var(--stamp-blue);
+}
+
+.stat-icon.red {
+  background: var(--stamp-red-tint);
+  color: var(--stamp-red);
+}
+
+.stat-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.625rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-950);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--ink-500);
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+
+/* ── Section headers ────────────────────────────────────────── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink-900);
+}
+
+/* ── Buttons — flat fill, no gradients/glow ───────────────────── */
+.btn {
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.84375rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration) var(--ease);
+  letter-spacing: 0;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--ink-950);
+  border-color: var(--ink-950);
+  color: var(--paper);
+}
+
+.btn-primary:hover {
+  background: var(--brass-dark);
+  border-color: var(--brass-dark);
+  color: #fff;
+}
+
+.btn-outline-primary {
+  border-color: var(--ink-300);
+  color: var(--ink-800);
+}
+
+.btn-outline-primary:hover {
+  background: var(--ink-950);
+  border-color: var(--ink-950);
+  color: var(--paper);
+}
+
+.btn-outline-danger {
+  border-color: var(--stamp-red);
+  color: var(--stamp-red);
+}
+
+.btn-outline-danger:hover {
+  background: var(--stamp-red);
+  border-color: var(--stamp-red);
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  border-color: var(--ink-200);
+  color: var(--ink-600);
+}
+
+.btn-outline-secondary:hover {
+  background: var(--ink-50);
+  color: var(--ink-900);
+}
+
+/* ── Forms ──────────────────────────────────────────────────── */
+.form-control,
+.form-select {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.875rem;
+  border-color: var(--ink-200);
+  border-radius: var(--radius-sm);
+  color: var(--ink-900);
+  background-color: var(--paper-raised);
+  transition: border-color var(--duration), box-shadow var(--duration);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brass);
+  background-color: #fff;
+  box-shadow: 0 0 0 3px var(--brass-tint);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--ink-700);
+  margin-bottom: 0.375rem;
+}
+
+/* ── Tables — ruled ledger, double rule under header ──────────── */
+.table-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.table {
+  margin: 0;
+}
+
+.table thead th {
+  background: var(--ink-50);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-500);
+  border-bottom: 3px double var(--ink-300);
+  padding: 0.8125rem 1rem;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  padding: 0.78125rem 1rem;
+  border-bottom: 1px solid var(--ink-100);
+  font-size: 0.875rem;
+  color: var(--ink-700);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background var(--duration-fast);
+}
+
+.table tbody tr:hover {
+  background: var(--paper-sunken);
+}
+
+.table th {
+  border-top: none;
+}
+
+/* ── Badges — rubber-stamp treatment, replaces gradient pills ── */
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.32em 0.6em;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid currentColor;
+  background: transparent !important;
+}
+
+.badge-admin {
+  color: var(--stamp-blue);
+}
+
+.badge-empleado {
+  color: var(--stamp-green);
+}
+
+.badge-activo {
+  color: var(--stamp-green);
+}
+
+.badge-devuelto {
+  color: var(--ink-500);
+  border-style: dashed;
+}
+
+.badge-vencido {
+  color: var(--stamp-red);
+}
+
+/* ── Modals ─────────────────────────────────────────────────── */
+.modal-content {
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 45px rgba(23, 31, 27, 0.22);
+  overflow: hidden;
+}
+
+.modal-header {
+  background: var(--ink-950);
+  color: var(--paper);
+  border-bottom: 3px solid var(--brass);
+  padding: 1.125rem 1.5rem;
+}
+
+.modal-header .modal-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+  opacity: 0.7;
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  background: var(--ink-50);
+  border-top: 1px solid var(--ink-200);
+}
+
+/* ── Spinner ────────────────────────────────────────────────── */
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(244, 242, 234, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* ── Toast ──────────────────────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  bottom: 1.75rem;
+  right: 1.75rem;
+  z-index: 10000;
+}
+
+.toast {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--ink-200) !important;
+  box-shadow: var(--shadow-raised) !important;
+  font-size: 0.875rem;
+  font-family: 'Work Sans', sans-serif;
+}
+
+/* ── Empty state ────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  color: var(--ink-400);
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+/* ── Search bar ─────────────────────────────────────────────── */
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-bar input {
+  min-width: 240px;
+}
+
+/* ── Stock ──────────────────────────────────────────────────── */
+.stock-low {
+  color: var(--stamp-red);
+  font-weight: 700;
+}
+
+.progress-sm {
+  height: 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Motion — kept minimal on purpose ──────────────────────────
+   No shimmer, no staggered entrance choreography: on a records
+   system, content should feel present, not "revealed". */
+.fade-in-up {
+  animation: none;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+}
