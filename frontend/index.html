@@ -61,7 +61,7 @@
             <label for="password" class="form-label fw-semibold">Contraseña</label>
             <div class="input-group">
               <input type="password" class="form-control" id="password" placeholder="••••••••" autocomplete="current-password">
-              <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+              <button class="btn btn-outline-secondary" type="button" id="toggle-password" aria-label="Mostrar contraseña">
                 <i class="bi bi-eye" id="eye-icon"></i>
               </button>
             </div>
@@ -82,9 +82,11 @@
       if (input.type === 'password') {
         input.type = 'text';
         icon.className = 'bi bi-eye-slash';
+        document.getElementById('toggle-password').setAttribute('aria-label', 'Ocultar contraseña');
       } else {
         input.type = 'password';
         icon.className = 'bi bi-eye';
+        document.getElementById('toggle-password').setAttribute('aria-label', 'Mostrar contraseña');
       }
     });
   </script>
